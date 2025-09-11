@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Klarna Bank AB (publ)
+ *
+ * For the full copyright and license information, please view the NOTICE
+ * and LICENSE files that were distributed with this source code.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="controller_action_predispatch_checkout_index_index">
+        <observer name="klarna_checkout_redirect" instance="Klarna\Kco\Observer\LoadKlarnaCheckout" shared="false"/>
+    </event>
+    <event name="kco_merchant_checkbox_create_account_validation">
+        <observer name="merchant_checkbox_create_account_validation" instance="Klarna\Kco\Observer\MerchantCheckboxCreateAccountValidation"/>
+    </event>
+    <event name="kco_merchant_checkbox_create_account_save">
+        <observer name="merchant_checkbox_create_account_save" instance="Klarna\Kco\Observer\MerchantCheckboxCreateAccount"/>
+    </event>
+    <event name="kco_merchant_checkbox_newsletter_signup_validation">
+        <observer name="merchant_checkbox_newsletter_signup_validation" instance="Klarna\Kco\Observer\MerchantCheckboxNewsletterSignupValidation"/>
+    </event>
+    <event name="kco_merchant_checkbox_newsletter_signup_save">
+        <observer name="merchant_checkbox_newsletter_signup_save" instance="Klarna\Kco\Observer\MerchantCheckboxNewsletterSignup"/>
+    </event>
+    <event name="controller_action_predispatch_checkout_klarna_index">
+        <observer name="kco_kco_prefill_notice_check" instance="Klarna\Kco\Observer\PreFillNoticeCheckAccept"/>
+    </event>
+    <event name="core_layout_block_create_after">
+        <observer name="klarna_core_layout_block_create_after" instance="Klarna\Kco\Observer\LayoutBlockCreateAfter"/>
+    </event>
+</config>

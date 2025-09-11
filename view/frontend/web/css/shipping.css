@@ -1,0 +1,15 @@
+#opc-shipping_method {
+    margin: 0;
+    padding: 0;
+    list-style: none none;
+}
+
+@media only screen and (max-width: 768px) {
+    .checkout-shipping-method .step-title {
+        margin-top: 40px;
+    }
+}
+
+.opc-block-summary .mark .value {
+    display: none !important;
+}

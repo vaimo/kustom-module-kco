@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Klarna Bank AB (publ)
+ *
+ * For the full copyright and license information, please view the NOTICE
+ * and LICENSE files that were distributed with this source code.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Klarna\Kco\Model\Cart\Validations\Handler">
+        <arguments>
+            <argument name="validations" xsi:type="array">
+                <item name="shipping_amount" xsi:type="object">Klarna\Kco\Model\Cart\Validations\ShippingAmount</item>
+                <item name="shipping_method" xsi:type="object">Klarna\Kco\Model\Cart\Validations\ShippingMethod</item>
+                <item name="totals" xsi:type="object">Klarna\Kco\Model\Cart\Validations\OrderTotal</item>
+                <item name="order_items" xsi:type="object">Klarna\Kco\Model\Cart\Validations\OrderItems</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Klarna\Kco\Helper\KlarnaConfig">
+        <arguments>
+            <argument name="config" xsi:type="object">Klarna\Base\Config\Virtual</argument>
+        </arguments>
+    </type>
+
+    <!-- Payment Method configuration -->
+    <type name="Klarna\Kco\Model\Payment\Kco">
+        <arguments>
+            <argument name="adapter" xsi:type="object">KcoPaymentAdapter</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="KcoPaymentAdapter" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">Klarna\Kco\Model\Payment\Kco::METHOD_CODE</argument>
+            <argument name="valueHandlerPool" xsi:type="object">KcoValueHandlerPool</argument>
+            <argument name="validatorPool" xsi:type="object">KcoValidatorPool</argument>
+            <argument name="commandPool" xsi:type="object">KcoCommandPool</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Klarna\Base\Block\Info\Klarna</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="KcoCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="initialize" xsi:type="string">Klarna\Kco\Gateway\Command\Initialize</item>
+                <!-- Check Ordermanagement module for arguments -->
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="KcoConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Klarna\Kco\Model\Payment\Kco::METHOD_CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="KcoConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">KcoConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="KcoValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">KcoConfigValueHandler</item>
+                <item name="title" xsi:type="string">Klarna\Kco\Gateway\Handler\TitleHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="KcoValidatorPool" type="Magento\Payment\Gateway\Validator\ValidatorPool">
+        <arguments>
+            <argument name="validators" xsi:type="array">
+                <!-- intentionally empty -->
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magento\Checkout\Helper\Data">
+        <plugin name="afterIsAllowedGuestCheckout" type="Klarna\Kco\Plugin\CheckoutHelperPlugin" sortOrder="10"/>
+    </type>
+    <type name="Magento\Payment\Model\MethodList">
+        <plugin sortOrder="1" name="klarnaKcoMethodList" type="Klarna\Kco\Plugin\Model\MethodListPlugin"/>
+    </type>
+
+    <type name="Klarna\Kco\Model\CacheQuoteRepository">
+        <arguments>
+            <argument name="quoteRepository" xsi:type="object">Klarna\Kco\Model\QuoteRepository</argument>
+        </arguments>
+    </type>
+
+    <preference for="Klarna\Kco\Api\ApiInterface" type="Klarna\Kco\Model\Api\Kasper" />
+    <preference for="Klarna\Kco\Api\QuoteInterface" type="Klarna\Kco\Model\Quote" />
+    <preference for="Klarna\Kco\Api\QuoteRepositoryInterface" type="Klarna\Kco\Model\CacheQuoteRepository" />
+
+    <!-- Sensitive and environment settings -->
+    <type name="Magento\Config\Model\Config\TypePool">
+        <arguments>
+            <argument name="environment" xsi:type="array">
+                <item name="checkout/klarna_kco/terms_url" xsi:type="string">1</item>
+                <item name="checkout/klarna_kco/cancellation_terms_url" xsi:type="string">1</item>
+                <item name="checkout/klarna_kco/failure_url" xsi:type="string">1</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Shipping Method Gateway -->
+    <type name="Magento\Tax\Model\Calculation\TotalBaseCalculator">
+        <plugin sortOrder="1" name="klarnaKcoShippingGatewayUpdateTotalBase" type="Klarna\Kco\Plugin\ShippingMethodGateway\Calculation\TotalBaseCalculatorPlugin"/>
+    </type>
+    <type name="Magento\Tax\Model\Calculation\UnitBaseCalculator">
+        <plugin sortOrder="1" name="klarnaKcoShippingGatewayUpdateUnitBase" type="Klarna\Kco\Plugin\ShippingMethodGateway\Calculation\UnitBaseCalculatorPlugin"/>
+    </type>
+    <type name="Magento\Tax\Model\Calculation\RowBaseCalculator">
+        <plugin sortOrder="1" name="klarnaKcoShippingGatewayUpdateRowBase" type="Klarna\Kco\Plugin\ShippingMethodGateway\Calculation\RowBaseCalculatorPlugin"/>
+    </type>
+    <type name="Magento\Shipping\Model\CarrierFactory">
+        <plugin sortOrder="1" name="klarnaKcoShippingGatewayCarrierFactory" type="Klarna\Kco\Plugin\ShippingMethodGateway\CarrierFactoryPlugin"/>
+    </type>
+</config>

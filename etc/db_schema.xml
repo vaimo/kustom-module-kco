@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Klarna Bank AB (publ)
+ *
+ * For the full copyright and license information, please view the NOTICE
+ * and LICENSE files that were distributed with this source code.
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="klarna_kco_quote" resource="default" engine="innodb" comment="Klarna Checkout Quote">
+        <column xsi:type="int" name="kco_quote_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Checkout Id"/>
+        <column xsi:type="varchar" name="klarna_checkout_id" nullable="true" length="255" comment="Klarna Checkout Id"/>
+        <column xsi:type="smallint" name="is_active" padding="6" unsigned="false" nullable="false" identity="false" default="0" comment="Is Active"/>
+        <column xsi:type="int" name="quote_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Quote Id"/>
+        <column xsi:type="smallint" name="is_changed" padding="6" unsigned="false" nullable="false" identity="false" default="0" comment="Is Changed"/>
+        <column name="created_at" xsi:type="timestamp" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column name="updated_at" xsi:type="timestamp" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="kco_quote_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="KLARNA_KCO_QUOTE_QUOTE_ID_QUOTE_ENTITY_ID" table="klarna_kco_quote" column="quote_id" referenceTable="quote" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="KLARNA_KCO_QUOTE_KLARNA_CHECKOUT_ID" indexType="btree">
+            <column name="klarna_checkout_id"/>
+        </index>
+    </table>
+</schema>

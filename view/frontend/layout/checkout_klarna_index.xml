@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Klarna Bank AB (publ)
+ *
+ * For the full copyright and license information, please view the NOTICE
+ * and LICENSE files that were distributed with this source code.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="klarnacheckout" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="checkout_index_index"/>
+    <head>
+        <css src="Klarna_Kco::css/shipping.css" />
+    </head>
+    <body>
+        <referenceContainer name="columns.top">
+            <container name="checkout.messages" htmlTag="div" htmlClass="page messages">
+                <block class="Magento\Framework\View\Element\Template" name="ajax.message.placeholder" template="Magento_Theme::html/messages.phtml"/>
+                <block class="Magento\Framework\View\Element\Messages" name="messages" as="messages" template="Magento_Theme::messages.phtml"/>
+            </container>
+        </referenceContainer>
+        <referenceBlock name="checkout.root">
+            <arguments>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="checkout" xsi:type="array">
+                            <item name="children" xsi:type="array">
+                                <item name="steps" xsi:type="array">
+                                    <item name="children" xsi:type="array">
+                                        <item name="shipping-step" xsi:type="array">
+                                            <item name="config" xsi:type="array">
+                                                <item name="componentDisabled" xsi:type="boolean">true</item>
+                                            </item>
+                                        </item>
+                                        <item name="billing-step" xsi:type="array">
+                                            <item name="config" xsi:type="array">
+                                                <item name="componentDisabled" xsi:type="boolean">true</item>
+                                            </item>
+                                        </item>
+                                        <item name="klarna_kco" xsi:type="array">
+                                            <item name="component" xsi:type="string">Klarna_Kco/js/view/kco-view</item>
+                                            <!--To display step content before shipping step "sortOrder" value should be < 1-->
+                                            <!--To display step content between shipping step and payment step  1 < "sortOrder" < 2 -->
+                                            <!--To display step content after payment step "sortOrder" > 2 -->
+                                            <item name="sortOrder" xsi:type="string">3</item>
+                                            <item name="displayArea" xsi:type="string">custom-checkout-klarna</item>
+                                            <item name="children" xsi:type="array">
+                                                <item name="klarna_prefill" xsi:type="array">
+                                                    <item name="component" xsi:type="string">Klarna_Kco/js/view/prefill_notice</item>
+                                                    <item name="displayArea" xsi:type="string">klarna-extra</item>
+                                                </item>
+                                            </item>
+                                        </item>
+                                    </item>
+                                </item>
+                                <item name="sidebar" xsi:type="array">
+                                    <item name="children" xsi:type="array">
+                                        <item name="klarna_shipping" xsi:type="array">
+                                            <item name="component" xsi:type="string">Klarna_Kco/js/view/shipping-method</item>
+                                            <item name="provider" xsi:type="string">checkoutProvider</item>
+                                            <item name="displayArea" xsi:type="string">summary</item>
+                                            <item name="sortOrder" xsi:type="string">1</item>
+                                            <item name="children" xsi:type="array">
+                                                <item name="price" xsi:type="array">
+                                                    <item name="component" xsi:type="string">Magento_Tax/js/view/checkout/shipping_method/price</item>
+                                                    <item name="displayArea" xsi:type="string">price</item>
+                                                </item>
+                                                <item name="step-config" xsi:type="array">
+                                                    <item name="component" xsi:type="string">uiComponent</item>
+                                                    <item name="children" xsi:type="array">
+                                                        <item name="shipping-rates-validation" xsi:type="array">
+                                                            <item name="children" xsi:type="array">
+                                                                <!--Step configuration components-->
+                                                            </item>
+                                                        </item>
+                                                    </item>
+                                                </item>
+                                                <item name="before-shipping-method-form" xsi:type="array">
+                                                    <item name="component" xsi:type="string">uiComponent</item>
+                                                    <item name="displayArea" xsi:type="string">before-shipping-method-form</item>
+                                                    <item name="children" xsi:type="array">
+                                                        <!-- address-list-additional-addresses -->
+                                                    </item>
+                                                </item>
+                                            </item>
+                                        </item>
+                                        <item name="summary" xsi:type="array">
+                                            <item name="sortOrder" xsi:type="string">10</item>
+                                        </item>
+                                        <item name="klarna_sidebar" xsi:type="array">
+                                            <item name="component" xsi:type="string">Klarna_Kco/js/view/sidebar</item>
+                                            <item name="displayArea" xsi:type="string">summary</item>
+                                            <item name="sortOrder" xsi:type="string">20</item>
+                                            <item name="children" xsi:type="array">
+                                                <item name="discount" xsi:type="array">
+                                                    <item name="component" xsi:type="string">Magento_SalesRule/js/view/payment/discount</item>
+                                                    <item name="displayArea" xsi:type="string">klarna-summary</item>
+                                                    <item name="sortOrder" xsi:type="string">10</item>
+                                                    <item name="children" xsi:type="array">
+                                                        <item name="errors" xsi:type="array">
+                                                            <item name="sortOrder" xsi:type="string">0</item>
+                                                            <item name="component" xsi:type="string">Magento_SalesRule/js/view/payment/discount-messages</item>
+                                                            <item name="displayArea" xsi:type="string">messages</item>
+                                                        </item>
+                                                    </item>
+                                                </item>
+                                            </item>
+                                        </item>
+                                        <item name="shipping-information" xsi:type="array">
+                                            <item name="component" xsi:type="string">Klarna_Kco/js/view/shipping-information</item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+    </body>
+</page>

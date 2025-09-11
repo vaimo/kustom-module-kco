@@ -1,0 +1,16 @@
+<!--
+/**
+ * Copyright © Klarna Bank AB (publ)
+ *
+ * For the full copyright and license information, please view the NOTICE
+ * and LICENSE files that were distributed with this source code.
+ */
+-->
+<li id="klarna_kco">
+    <div id="checkout-step-title" class="step-content" data-role="content">
+        <!-- ko foreach: getRegion('klarna-extra') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+        <div data-bind="html: klarna_iframe"></div>
+    </div>
+</li>

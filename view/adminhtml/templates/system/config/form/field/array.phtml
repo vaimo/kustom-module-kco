@@ -1,0 +1,157 @@
+<?php
+/**
+ * Copyright © Klarna Bank AB (publ)
+ *
+ * For the full copyright and license information, please view the NOTICE
+ * and LICENSE files that were distributed with this source code.
+ */
+
+?>
+
+<?php
+$_htmlId = $block->getHtmlId() ? $block->getHtmlId() : '_' . uniqid();
+$_colspan = $block->isAddAfter() ? 2 : 1;
+?>
+<div class="design_theme_ua_regexp" id="grid<?= /* @noEscape */ $_htmlId ?>">
+    <div class="admin__control-table-wrapper">
+        <table class="admin__control-table" id="<?= /* @noEscape */ $block->getElement()->getId() ?>">
+            <thead>
+            <tr>
+                <th><?= /* @noEscape */ __('Checkboxes') ?></th>
+                <th class="col-actions" colspan="<?= /* @noEscape */ $_colspan ?>">
+                    <?= /* @noEscape */ __('Action') ?>
+                </th>
+            </tr>
+            </thead>
+            <tfoot>
+            <tr>
+                <td colspan="<?= count($block->getColumns())+$_colspan ?>" class="col-actions-add">
+                    <button id="addToEndBtn<?= /* @noEscape */ $_htmlId ?>"
+                            class="action-add" title="<?= /* @noEscape */ __('Add') ?>"
+                            type="button"
+                    >
+                        <span><?= /* @noEscape */ $block->getAddButtonLabel() ?></span>
+                    </button>
+                </td>
+            </tr>
+            </tfoot>
+            <tbody id="addRow<?= /* @noEscape */ $_htmlId ?>"></tbody>
+        </table>
+    </div>
+    <input type="hidden" name="<?= /* @noEscape */ $block->getElement()->getName() ?>[__empty]" value="" />
+
+    <script>
+        require([
+            'mage/template',
+            'prototype'
+        ], function (mageTemplate) {
+            // create row creator
+            window.arrayRow<?= /* @noEscape */ $_htmlId ?> = {
+
+                // define row prototypeJS template
+                template: mageTemplate(
+                    '<tr id="<%- _id %>">'
+                    + '<td>'
+                    + '<table>'
+
+                    <?php foreach ($block->getColumns() as $columnName => $column): ?>
+                    + '<tr>'
+                    + '<td>'
+                    + '<?= /* @noEscape */ $column['label'] ?>'
+                    + '<\/td>'
+
+                    + '<td>'
+                    + '<?= /* @noEscape */ $block->renderCellTemplate($columnName) ?>'
+                    + '<\/td>'
+                    + '<\/tr>'
+                    <?php endforeach; ?>
+
+                    + '<\/table>'
+                    + '<\/td>'
+                    <?php if ($block->isAddAfter()): ?>
+                    + '<td><button class="action-add" '
+                    + 'type="button" '
+                    + 'id="addAfterBtn<%- _id %>">'
+                    + '<span><?= /* @noEscape */ __('Add after') ?><\/span><\/button><\/td>'
+                    <?php endif; ?>
+
+                    + '<td class="col-actions">'
+                    + '<button onclick="arrayRow<?= /* @noEscape */ $_htmlId ?>.del(\'<%- _id %>\')"'
+                    + 'class="action-delete" '
+                    + 'type="button"><span><?= /* @noEscape */ __('Delete') ?><\/span><\/button><\/td>'
+                    +'<\/tr>'
+                ),
+
+                add: function(rowData, insertAfterId) {
+                    // generate default template data
+                    var templateValues;
+
+                    // Prepare template values
+                    if (rowData) {
+                        templateValues = rowData;
+                    } else {
+                        var d = new Date();
+                        templateValues = {
+                        <?php foreach ($block->getColumns() as $columnName => $column): ?>
+                            <?= /* @noEscape */ $columnName ?>: '',
+                            'option_extra_attrs': {},
+                        <?php endforeach; ?>
+                        _id: '_' + d.getTime() + '_' + d.getMilliseconds()
+                    };
+                    }
+
+                    // Insert new row after specified row or at the bottom
+                    if (insertAfterId) {
+                        Element.insert($(insertAfterId), {after: this.template(templateValues)});
+                    } else {
+                        Element.insert(
+                            $('addRow<?= /* @noEscape */ $_htmlId ?>'),
+                            {bottom: this.template(templateValues)}
+                        );
+                    }
+
+                    // Fill controls with data
+                    if (rowData) {
+                        var rowInputElementNames = Object.keys(rowData.column_values);
+                        for (var i = 0; i < rowInputElementNames.length; i++) {
+                            if ($(rowInputElementNames[i])) {
+                                $(rowInputElementNames[i]).setValue(rowData.column_values[rowInputElementNames[i]]);
+                            }
+                        }
+                    }
+
+                    // Add event for {addAfterBtn} button
+                    <?php if ($block->isAddAfter()): ?>
+                    Event.observe(
+                        'addAfterBtn' + templateValues._id,
+                        'click',
+                        this.add.bind(this, false, templateValues._id)
+                    );
+                    <?php endif; ?>
+                },
+
+                del: function(rowId) {
+                    $(rowId).remove();
+                }
+            }
+
+            // bind add action to "Add" button in last row
+            Event.observe(
+                'addToEndBtn<?= /* @noEscape */ $_htmlId ?>',
+                'click',
+                arrayRow<?=/* @noEscape */ $_htmlId ?>.add.bind(arrayRow<?= /* @noEscape */ $_htmlId ?>, false, false));
+
+            // add existing rows
+            <?php
+            foreach ($block->getArrayRows() as $_rowId => $_row) {
+                /* @noEscape */ echo "arrayRow{$_htmlId}.add(" . $_row->toJson() . ");\n";
+            }
+            ?>
+
+            // Toggle the grid availability, if element is disabled (depending on scope)
+            <?php if ($block->getElement()->getDisabled()):?>
+            toggleValueElements({checked: true}, $('grid<?= /* @noEscape */ $_htmlId ?>').parentNode);
+            <?php endif;?>
+        });
+    </script>
+</div>

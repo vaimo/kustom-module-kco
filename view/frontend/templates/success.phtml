@@ -1,0 +1,27 @@
+<?php
+/**
+ * Copyright © Klarna Bank AB (publ)
+ *
+ * For the full copyright and license information, please view the NOTICE
+ * and LICENSE files that were distributed with this source code.
+ */
+?>
+
+<script>
+    require([
+        'Magento_Customer/js/customer-data'
+    ], function (customerData) {
+        /**
+         * In some Magento versions it can be that the minicart does not clear correctly. Therefore we
+         * clear the storage cache manually.
+         */
+        customerData.initStorage();
+        customerData.invalidate(['cart']);
+        customerData.reload(['cart'], true);
+    });
+</script>
+
+<?php /** @var $block \Klarna\Kco\Block\Success */ ?>
+<div id="klarna_checkout_success">
+    <?= $block->getKlarnaSuccessHtml(); ?>
+</div>

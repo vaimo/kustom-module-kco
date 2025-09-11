@@ -1,0 +1,28 @@
+{
+   "name": "vaimo/kustom-module-kco",
+    "description": "Kustom Checkout Magento 2 Extension",
+    "type": "magento2-module",
+    "license": "Apache-2.0",
+    "version": "12.0.16",
+    "scripts": {
+        "test": "phpunit",
+        "cov": "phpunit --coverage-html coverage"
+    },
+    "require": {
+        "ext-json": "*",
+        "klarna/module-admin-settings": "1.0.14",
+        "klarna/module-base": "11.0.12",
+        "klarna/module-kss": "3.0.15",
+        "klarna/module-logger": "3.0.9",
+        "klarna/module-orderlines": "3.0.15",
+        "magento/framework": "^103",
+        "monolog/monolog": "^2.3 || ^3.9.0",
+        "php": "~7.4.0||~8.1.0||~8.2.0||~8.3.0||~8.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Klarna\\Kco\\": "."
+        },
+        "files": [ "registration.php" ]
+    }
+}

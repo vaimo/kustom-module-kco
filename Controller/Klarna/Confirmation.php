@@ -1,0 +1,161 @@
+<?php
+/**
+ * Copyright © Klarna Bank AB (publ)
+ *
+ * For the full copyright and license information, please view the NOTICE
+ * and LICENSE files that were distributed with this source code.
+ */
+declare(strict_types=1);
+
+namespace Klarna\Kco\Controller\Klarna;
+
+use Klarna\Kco\Model\Checkout\Url;
+use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\AlreadyExistsException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Klarna\Kco\Model\Order\Order as CheckoutOrder;
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\LocalizedException;
+use Klarna\Base\Exception as KlarnaException;
+use Klarna\Logger\Api\LoggerInterface;
+use Magento\Framework\Controller\Result\Redirect;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Controller\Result\RedirectFactory;
+use Magento\Framework\Message\ManagerInterface;
+
+/**
+ * The Klarna confirmation controller
+ *
+ * @api
+ */
+class Confirmation implements HttpGetActionInterface
+{
+    /**
+     * @var Url
+     */
+    private $url;
+    /**
+     * @var CheckoutOrder
+     */
+    private $checkoutOrder;
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+    /**
+     * @var RequestInterface
+     */
+    private RequestInterface $request;
+    /**
+     * @var RedirectFactory
+     */
+    private RedirectFactory $redirectFactory;
+    /**
+     * @var ManagerInterface
+     */
+    private ManagerInterface $messageManager;
+
+    /**
+     * @param Url $url
+     * @param CheckoutOrder $checkoutOrder
+     * @param LoggerInterface $logger
+     * @param RequestInterface $request
+     * @param RedirectFactory $redirectFactory
+     * @param ManagerInterface $messageManager
+     * @codeCoverageIgnore
+     */
+    public function __construct(
+        Url $url,
+        CheckoutOrder $checkoutOrder,
+        LoggerInterface $logger,
+        RequestInterface $request,
+        RedirectFactory $redirectFactory,
+        ManagerInterface $messageManager
+    ) {
+        $this->url = $url;
+        $this->checkoutOrder = $checkoutOrder;
+        $this->logger = $logger;
+        $this->request = $request;
+        $this->redirectFactory = $redirectFactory;
+        $this->messageManager = $messageManager;
+    }
+
+    /**
+     * Performing the confirmation action
+     *
+     * @return $this|ResultInterface
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     */
+    public function execute()
+    {
+        $klarnaOrderId = $this->request->getParam('id');
+        $this->logger->debug('Klarna order id: ' . $klarnaOrderId);
+
+        if (!$klarnaOrderId) {
+            return $this->getInvalidOrderIdResponse();
+        }
+
+        try {
+            $this->checkoutOrder->createMagentoOrder($klarnaOrderId);
+            $this->checkoutOrder->sendCustomerMail();
+        } catch (AlreadyExistsException $e) {
+            return $this->getOrderAlreadyExistsResponse();
+        } catch (LocalizedException $e) {
+            return $this->getErrorResponse($e, $klarnaOrderId);
+        }
+
+        return $this->getSuccessResponse();
+    }
+
+    /**
+     * Returning the success response
+     *
+     * @return Redirect
+     */
+    private function getSuccessResponse(): Redirect
+    {
+        $this->logger->debug('Confirmation: Success');
+        return $this->redirectFactory->create()->setPath(Url::CHECKOUT_ACTION_PREFIX . '/success');
+    }
+
+    /**
+     * Returning a general error response
+     *
+     * @param KlarnaException|NoSuchEntityException|CouldNotSaveException|LocalizedException $e
+     * @param string $klarnaOrderId
+     * @return Redirect
+     */
+    private function getErrorResponse($e, string $klarnaOrderId): Redirect
+    {
+        $this->logger->critical($e);
+        $this->checkoutOrder->cancelKlarnaOrder($klarnaOrderId, $e->getMessage());
+        $this->messageManager->addErrorMessage($e->getMessage());
+
+        return $this->redirectFactory->create()->setUrl($this->url->getFailureUrl());
+    }
+
+    /**
+     * Returning a invalid order id response
+     *
+     * @return Redirect
+     */
+    private function getInvalidOrderIdResponse(): Redirect
+    {
+        $this->messageManager->addErrorMessage(__('Unable to process order. Please try again'));
+        return $this->redirectFactory->create()->setUrl($this->url->getFailureUrl());
+    }
+
+    /**
+     * Returning a response for the case the order already exists
+     *
+     * @return Redirect
+     */
+    private function getOrderAlreadyExistsResponse(): Redirect
+    {
+        $this->logger->debug('Confirmation: Order already exist');
+
+        $this->messageManager->addErrorMessage(__('Order already exist.'));
+        return $this->redirectFactory->create()->setUrl($this->url->getFailureUrl());
+    }
+}

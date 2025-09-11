@@ -1,0 +1,20 @@
+{
+    "klarna_kco_quote": {
+        "column": {
+            "kco_quote_id": true,
+            "klarna_checkout_id": true,
+            "is_active": true,
+            "quote_id": true,
+            "is_changed": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "KLARNA_KCO_QUOTE_KLARNA_CHECKOUT_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "KLARNA_KCO_QUOTE_QUOTE_ID_QUOTE_ENTITY_ID": true
+        }
+    }
+}

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Klarna Bank AB (publ)
+ *
+ * For the full copyright and license information, please view the NOTICE
+ * and LICENSE files that were distributed with this source code.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\Url\SecurityInfo">
+        <arguments>
+            <argument name="secureUrlList" xsi:type="array">
+                <item name="kco_checkout" xsi:type="const">Klarna\Kco\Model\Checkout\Url::CHECKOUT_ACTION_PREFIX</item>
+                <item name="kco_api" xsi:type="const">Klarna\Kco\Model\Checkout\Url::API_ACTION_PREFIX</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Checkout\Block\Checkout\LayoutProcessor">
+        <plugin name="klarna_checkout" type="Klarna\Kco\Block\Checkout\LayoutProcessorPlugin" sortOrder="99999" disabled="false"/>
+    </type>
+    <type name="Magento\Checkout\Model\CompositeConfigProvider">
+        <arguments>
+            <argument name="configProviders" xsi:type="array">
+                <item name="checkout_klarna_kco_config" xsi:type="object">Klarna\Kco\Model\KcoConfigProvider</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Quote\Observer\SubmitObserver">
+        <plugin name="checkConfirmationEmail" type="Klarna\Kco\Plugin\Checkout\Observer\SubmitObserverPlugin" sortOrder="1"/>
+    </type>
+    <type name="Magento\Quote\Model\Quote\TotalsCollector">
+        <plugin name="klarna_collect_totals" type="Klarna\Kco\Plugin\Quote\TotalCollectorPlugin" sortOrder="1"/>
+    </type>
+</config>
