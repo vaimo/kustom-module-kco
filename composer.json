@@ -3,14 +3,14 @@
     "description": "Kustom Checkout Magento 2 Extension",
     "type": "magento2-module",
     "license": "Apache-2.0",
-    "version": "12.0.16",
+    "version": "12.0.17",
     "scripts": {
         "test": "phpunit",
         "cov": "phpunit --coverage-html coverage"
     },
     "require": {
         "ext-json": "*",
-        "vaimo/kustom-module-admin-settings": "1.0.14",
+        "vaimo/kustom-module-admin-settings": ">=1.0.14",
         "vaimo/kustom-module-base": "11.0.12",
         "vaimo/kustom-module-kss": "3.0.15",
         "vaimo/kustom-module-logger": "3.0.9",
