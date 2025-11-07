@@ -9,20 +9,23 @@ declare(strict_types=1);
 
 namespace Klarna\Kco\Model\Order;
 
+use Klarna\AdminSettings\Model\Configurations\Kco\Checkout;
 use Klarna\Backend\Api\ApiInterface;
 use Klarna\Backend\Model\Api\Factory;
 use Klarna\Backend\Model\Api\OrderManagement;
-use Klarna\AdminSettings\Model\Configurations\Kco\Checkout;
-use Klarna\Kco\Model\Order\Shop\Action;
-use Klarna\Logger\Api\LoggerInterface;
 use Klarna\Base\Api\OrderInterface;
 use Klarna\Base\Exception as KlarnaException;
 use Klarna\Base\Model\OrderRepository;
 use Klarna\Kco\Api\ApiInterface as KcoApiInterface;
+use Klarna\Kco\Model\Cart\Validations\Handler;
 use Klarna\Kco\Model\Checkout\Kco\Initializer;
 use Klarna\Kco\Model\Checkout\Kco\Session as KcoSession;
+use Klarna\Kco\Model\Order\Shop\Action;
 use Klarna\Kco\Model\Payment\Kco;
 use Klarna\Kco\Model\PaymentStatus as KcoPaymentStatus;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Klarna\Kco\Model\WorkflowProvider;
+use Klarna\Logger\Api\LoggerInterface;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\LocalizedException;
@@ -33,8 +36,7 @@ use Magento\Sales\Api\Data\OrderInterface as MagentoOrderInterface;
 use Magento\Sales\Model\Order as SalesOrder;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderRepository as MageOrderRepository;
-use Klarna\Kco\Model\Cart\Validations\Handler;
-use Klarna\Kco\Model\WorkflowProvider;
+
 
 /**
  * Preparing and Creating orders and doing post order creation actions
@@ -105,6 +107,10 @@ class Order
      * @var Checkout
      */
     private Checkout $checkoutConfiguration;
+    /**
+     * @var SearchCriteriaBuilder
+     */
+    private SearchCriteriaBuilder $searchCriteriaBuilder;
 
     /**
      * @param KcoSession               $kcoSession
@@ -119,6 +125,7 @@ class Order
      * @param Handler                  $validation
      * @param Action                   $action
      * @param Checkout                 $checkoutConfiguration
+     * @param SearchCriteriaBuilder    $searchCriteriaBuilder
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      * @codeCoverageIgnore
      */
@@ -134,7 +141,8 @@ class Order
         KcoPaymentStatus $paymentStatus,
         Handler $validation,
         Action $action,
-        Checkout $checkoutConfiguration
+        Checkout $checkoutConfiguration,
+        SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         $this->kcoSession            = $kcoSession;
         $this->initializer           = $initializer;
@@ -148,6 +156,7 @@ class Order
         $this->validation            = $validation;
         $this->action                = $action;
         $this->checkoutConfiguration = $checkoutConfiguration;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
     /**
@@ -181,10 +190,18 @@ class Order
         $this->mageQuote = $this->workflowProvider->getMagentoQuote();
 
         try {
-            $magentoOrder = $this->mageOrderRepository->get($this->mageQuote->getReservedOrderId());
+            $searchCriteria = $this->searchCriteriaBuilder
+                ->addFilter('increment_id', $this->mageQuote->getReservedOrderId())
+                ->create();
+            $orderList = $this->mageOrderRepository->getList($searchCriteria);
 
-            // It means the order already exists and we return it so that we do not create another one
-            return $magentoOrder;
+            if ($orderList->getTotalCount() > 0) {
+                $magentoOrder = $orderList->getFirstItem();
+                $this->mageOrder = $magentoOrder;
+
+                // It means the order already exists and we return it so that we do not create another one
+                return $magentoOrder;
+            }
         } catch (NoSuchEntityException $e) {
             $this->logger->debug('Order is not yet created for Magento quote ID: ' . $this->mageQuote->getId());
         }
