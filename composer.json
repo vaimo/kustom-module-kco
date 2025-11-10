@@ -11,7 +11,7 @@
     "require": {
         "ext-json": "*",
         "vaimo/kustom-module-admin-settings": "^1",
-        "vaimo/kustom-module-base": "11.0.12",
+        "vaimo/kustom-module-base": "11.0.*",
         "vaimo/kustom-module-kss": "3.0.*",
         "vaimo/kustom-module-logger": "3.0.9",
         "vaimo/kustom-module-orderlines": "3.0.*",

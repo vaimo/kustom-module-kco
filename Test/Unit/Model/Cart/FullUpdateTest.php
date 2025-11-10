@@ -112,7 +112,7 @@ class FullUpdateTest extends TestCase
         $this->quote->method('getShippingAddress')
             ->willReturn($quoteShippingAddress);
 
-        $extensionAttributes = $this->mockFactory->create(CartExtension::class, ['getShippingAssignments'], []);
+        $extensionAttributes = $this->mockFactory->create(CartExtension::class, [], ['getShippingAssignments']);
         $extensionAttributes->method('getShippingAssignments')
             ->willReturn([]);
 
