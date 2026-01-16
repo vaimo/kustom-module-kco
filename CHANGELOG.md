@@ -1,3 +1,7 @@
+12.0.19 / 2026-01-16
+==================
+
+* KUSTOM-35 fix currency loading on order placement
 
 12.0.16 / 2025-06-03
 ==================
