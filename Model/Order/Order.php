@@ -317,7 +317,7 @@ class Order
         try {
             $orderManagement = $this->factory->createOmApi(
                 Kco::METHOD_CODE,
-                $this->mageOrder->getOrderCurrencyCode(),
+                $this->mageOrder?->getOrderCurrencyCode() ?: $store->getCurrentCurrencyCode(),
                 $store
             );
             $order = $orderManagement->getPlacedKlarnaOrder($klarnaOrderId);
