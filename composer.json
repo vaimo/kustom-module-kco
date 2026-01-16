@@ -1,5 +1,5 @@
 {
-   "name": "kustom/module-kco",
+   "name": "vaimo/kustom-module-kco",
     "description": "Kustom Checkout Magento 2 Extension",
     "type": "magento2-module",
     "license": "Apache-2.0",
@@ -10,11 +10,11 @@
     },
     "require": {
         "ext-json": "*",
-        "kustom/module-admin-settings": "^1",
-        "kustom/module-base": "11.0.*",
-        "kustom/module-kss": "3.0.*",
-        "kustom/module-logger": "3.0.9",
-        "kustom/module-orderlines": "3.0.*",
+        "vaimo/kustom-module-admin-settings": "^1",
+        "vaimo/kustom-module-base": "11.0.*",
+        "vaimo/kustom-module-kss": "3.0.*",
+        "vaimo/kustom-module-logger": "3.0.9",
+        "vaimo/kustom-module-orderlines": "3.0.*",
         "magento/framework": "^103",
         "monolog/monolog": "^2.3 || ^3.9.0",
         "php": "~7.4.0||~8.1.0||~8.2.0||~8.3.0||~8.4.0"
