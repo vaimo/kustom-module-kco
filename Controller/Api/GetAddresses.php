@@ -93,7 +93,7 @@ class GetAddresses implements HttpPostActionInterface
             $dataResult = $data;
             unset($data['billing']['region'], $data['full_shipping']['region']);
 
-            $this->logger->info($data);
+            $this->logger->info((string)json_encode($data));
         } catch (LocalizedException $e) {
             $this->logger->critical($e);
             throw $e;

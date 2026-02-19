@@ -1,3 +1,8 @@
+12.0.20 / 2026-02-19
+==================
+
+* KUSTOM-49 Fix error on logging address data into file
+
 12.0.19 / 2026-01-16
 ==================
 
