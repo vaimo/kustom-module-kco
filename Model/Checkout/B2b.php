@@ -51,13 +51,13 @@ class B2b
     /**
      * Check if this customer is a business customer
      *
-     * @param string $customerId
+     * @param ?string $customerId
      * @param StoreInterface $store
      * @return bool
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function isB2bCustomer(string $customerId, StoreInterface $store): bool
+    public function isB2bCustomer(?string $customerId, StoreInterface $store): bool
     {
         if ($customerId) {
             $businessIdValue = $this->getBusinessIdAttributeValue($customerId, $store);
