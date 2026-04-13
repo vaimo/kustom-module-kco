@@ -23,9 +23,11 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\DataObjectFactory;
+use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\LocalizedException;
 use Klarna\Base\Controller\CsrfAbstract;
 use Magento\Framework\DataObject;
+use Magento\Quote\Model\CartLockedException;
 
 /**
  * API call to notify Magento that the order is now ready to receive order management calls
@@ -206,6 +208,11 @@ class Push extends CsrfAbstract implements HttpPostActionInterface
             $this->checkoutOrder->createMagentoOrder($klarnaOrderId);
             $this->checkoutOrder->sendCustomerMail();
             $this->checkoutOrder->updateOrderState($klarnaOrderId);
+        } catch (AlreadyExistsException $e) {
+            $this->logger->debug('Order already exists for this Klarna order id: ' . $klarnaOrderId);
+        } catch (CartLockedException $e) {
+            $this->logger->info('Cart is locked, push will be retried: ' . $klarnaOrderId);
+            return $this->result->getJsonResult(503, ['error' => $e->getMessage()]);
         } catch (LocalizedException $e) {
             return $this->cancelKlarnaOrder($klarnaOrderId, $e);
         }

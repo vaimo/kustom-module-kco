@@ -23,6 +23,7 @@ use Magento\Framework\Controller\Result\Redirect;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Quote\Model\CartLockedException;
 
 /**
  * The Klarna confirmation controller
@@ -99,6 +100,9 @@ class Confirmation implements HttpGetActionInterface
         try {
             $this->checkoutOrder->createMagentoOrder($klarnaOrderId);
             $this->checkoutOrder->sendCustomerMail();
+        } catch (CartLockedException $e) {
+            $this->logger->info('Cart locked during confirmation (push running concurrently): ' . $klarnaOrderId);
+            return $this->getSuccessResponse();
         } catch (AlreadyExistsException $e) {
             return $this->getOrderAlreadyExistsResponse();
         } catch (LocalizedException $e) {
