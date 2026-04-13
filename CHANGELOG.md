@@ -1,3 +1,8 @@
+12.0.22 / 2026-04-10
+==================
+
+* KUSTOM-76 Fix Shipping amount does not match for order between Kustom and Klarna
+
 12.0.21 / 2026-02-24
 ==================
 

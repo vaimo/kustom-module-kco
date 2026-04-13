@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Klarna\Kco\Controller\Api;
 
 use Klarna\Kco\Model\Cart\ShippingMethod\KlarnaRequestQuoteTransformer;
+use Klarna\Kss\Model\KssConfigProvider;
 use Klarna\Logger\Api\LoggerInterface;
 use Klarna\Base\Exception as KlarnaException;
 use Klarna\Kco\Model\Checkout\Kco\Initializer;
@@ -47,6 +48,10 @@ class UpdateKssStatus implements HttpPostActionInterface
      * @var KlarnaRequestQuoteTransformer
      */
     private KlarnaRequestQuoteTransformer $klarnaRequestQuoteTransformer;
+    /**
+     * @var KssConfigProvider
+     */
+    private KssConfigProvider $kssConfigProvider;
 
     /**
      * @param LoggerInterface $logger
@@ -54,6 +59,7 @@ class UpdateKssStatus implements HttpPostActionInterface
      * @param Session $session
      * @param Ajax $ajax
      * @param KlarnaRequestQuoteTransformer $klarnaRequestQuoteTransformer
+     * @param KssConfigProvider $kssConfigProvider
      * @codeCoverageIgnore
      */
     public function __construct(
@@ -61,13 +67,15 @@ class UpdateKssStatus implements HttpPostActionInterface
         Initializer $initializer,
         Session $session,
         Ajax $ajax,
-        KlarnaRequestQuoteTransformer $klarnaRequestQuoteTransformer
+        KlarnaRequestQuoteTransformer $klarnaRequestQuoteTransformer,
+        KssConfigProvider $kssConfigProvider
     ) {
         $this->logger = $logger;
         $this->initializer = $initializer;
         $this->session = $session;
         $this->ajax = $ajax;
         $this->klarnaRequestQuoteTransformer = $klarnaRequestQuoteTransformer;
+        $this->kssConfigProvider = $kssConfigProvider;
     }
 
     /**
@@ -85,8 +93,11 @@ class UpdateKssStatus implements HttpPostActionInterface
     {
         $this->logger->info('UpdateKssStatus: Start');
 
+        $store = $this->session->getQuote()->getStore();
+        $isKssEnabled = $this->kssConfigProvider->isKssEnabled($store);
+
         $data = [];
-        if ($this->session->hasActiveKlarnaShippingGatewayInformation()) {
+        if ($isKssEnabled || $this->session->hasActiveKlarnaShippingGatewayInformation()) {
             $this->logger->info('UpdateKssStatus: Updating the values in the Klarna table and quote');
 
             $oldGrandTotal = $this->session->getQuote()->getGrandTotal();
