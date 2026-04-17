@@ -2,7 +2,7 @@
 ==================
 
 * [KUSTOM-76] Fix Shipping amount does not match for order between Kustom and Klarna
-* [KUSTOM-58][KUSTOM-77][KUSTOM-76][KUSTOM-82][KUSTOM-83][KUSTOM-84][KUSTOM-87] Fix Orders instantly cancelled by api because of uncaught exceptions
+* [KUSTOM-58][KUSTOM-77][KUSTOM-82][KUSTOM-83][KUSTOM-84] Fix Orders instantly cancelled by api because of uncaught exceptions
 
 12.0.21 / 2026-02-24
 ==================

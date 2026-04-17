@@ -202,7 +202,7 @@ class Push extends CsrfAbstract implements HttpPostActionInterface
     private function getCartLockedResponse(string $klarnaOrderId, CartLockedException $e): Json
     {
         $this->logger->debug(
-            'Push: Retry again: ' . $klarnaOrderId . ' - Exception: ' . $e->getMessage()
+            'Push: Retry order ' . $klarnaOrderId . ' - Exception: ' . $e->getMessage()
         );
         return $this->result->getJsonResult(
             503,
