@@ -119,7 +119,7 @@ class Push extends CsrfAbstract implements HttpPostActionInterface
             // phpcs:ignore Magento2.CodeAnalysis.EmptyBlock.DetectedCatch
         } catch (KlarnaException $e) {
             $this->logger->debug(
-                'No order is created because a paymentm ethod is selected with a external redirect.'
+                'No order is created because a payment method is selected with an external redirect.'
             );
             // We do nothing since when using for example the IDEAL payment no order is created at this point
         }
@@ -194,6 +194,23 @@ class Push extends CsrfAbstract implements HttpPostActionInterface
     }
 
     /**
+     * @param string $klarnaOrderId
+     * @param CartLockedException $e
+     *
+     * @return Json
+     */
+    private function getCartLockedResponse(string $klarnaOrderId, CartLockedException $e): Json
+    {
+        $this->logger->debug(
+            'Push: Retry again: ' . $klarnaOrderId . ' - Exception: ' . $e->getMessage()
+        );
+        return $this->result->getJsonResult(
+            503,
+            ['error' => $e->getMessage()]
+        );
+    }
+
+    /**
      * Create order in Magento if it doesn't currently exist.
      *
      * This is the case when the customer selected a payment gateway method (for example "iDeal").
@@ -209,11 +226,17 @@ class Push extends CsrfAbstract implements HttpPostActionInterface
             $this->checkoutOrder->sendCustomerMail();
             $this->checkoutOrder->updateOrderState($klarnaOrderId);
         } catch (AlreadyExistsException $e) {
-            $this->logger->debug('Order already exists for this Klarna order id: ' . $klarnaOrderId);
+            $this->logger->debug('Push: Order already exists for this Klarna order id: ' . $klarnaOrderId);
         } catch (CartLockedException $e) {
-            $this->logger->info('Cart is locked, push will be retried: ' . $klarnaOrderId);
-            return $this->result->getJsonResult(503, ['error' => $e->getMessage()]);
+            return $this->getCartLockedResponse($klarnaOrderId, $e);
         } catch (LocalizedException $e) {
+            // Before cancelling, check if a concurrent push already created the order successfully.
+            // If the Magento order exists, return success to avoid voiding a valid Klarna authorization.
+            $magentoOrder = $this->checkoutOrder->getMagentoOrder();
+            if ($magentoOrder !== null && $magentoOrder->getId()) {
+                $this->logger->debug('Push: Order already created by concurrent request: ' . $klarnaOrderId);
+                return $this->getSuccessResponse();
+            }
             return $this->cancelKlarnaOrder($klarnaOrderId, $e);
         }
         return $this->getSuccessResponse();
