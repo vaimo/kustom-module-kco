@@ -101,11 +101,18 @@ class Confirmation implements HttpGetActionInterface
             $this->checkoutOrder->createMagentoOrder($klarnaOrderId);
             $this->checkoutOrder->sendCustomerMail();
         } catch (CartLockedException $e) {
-            $this->logger->info('Cart locked during confirmation (push running concurrently): ' . $klarnaOrderId);
+            $this->logger->debug('Confirmation: push running concurrently: ' . $klarnaOrderId . ' - Exception: ' . $e->getMessage());
             return $this->getSuccessResponse();
         } catch (AlreadyExistsException $e) {
             return $this->getOrderAlreadyExistsResponse();
         } catch (LocalizedException $e) {
+            // Before cancelling, check if a concurrent push already created the order successfully.
+            // If the Magento order exists, return success to avoid voiding a valid Klarna authorization.
+            $magentoOrder = $this->checkoutOrder->getMagentoOrder();
+            if ($magentoOrder !== null && $magentoOrder->getId()) {
+                $this->logger->debug('Confirmation: Order already created by concurrent request: ' . $klarnaOrderId);
+                return $this->getSuccessResponse();
+            }
             return $this->getErrorResponse($e, $klarnaOrderId);
         }
 
