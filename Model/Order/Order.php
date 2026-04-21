@@ -365,7 +365,9 @@ class Order
             $this->mageOrder->getStore()
         );
         $klarnaOrderDetails = $this->fetchKlarnaOrderDetails($omApi, $klarnaOrder->getKlarnaOrderId());
-        if ($klarnaOrderDetails->getStatus() === KcoApiInterface::ORDER_STATUS_CANCELLED) {
+        $klarnaStatus = $klarnaOrderDetails->getStatus();
+
+        if ($klarnaStatus === KcoApiInterface::ORDER_STATUS_CANCELLED) {
             $this->logger->info(
                 'Klarna order is ' . $klarnaStatus . '. Cancelling Magento order: '
                 . $this->mageOrder->getIncrementId()
@@ -429,7 +431,7 @@ class Order
 
         $order->cancel();
         $order->addStatusHistoryComment(
-            __('Order automatically cancelled because Klarna order status is: %1', $klarnaStatus)
+            __('Order automatically cancelled because Klarna status is: %1', $klarnaStatus)
         );
         $this->mageOrderRepository->save($order);
 
