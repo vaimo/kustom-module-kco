@@ -366,7 +366,7 @@ class Order
         );
         $klarnaOrderDetails = $this->fetchKlarnaOrderDetails($omApi, $klarnaOrder->getKlarnaOrderId());
         $klarnaStatus = $klarnaOrderDetails->getStatus();
-
+        // TODO: Consider saving cancel status in database klarna table
         if ($klarnaStatus === KcoApiInterface::ORDER_STATUS_CANCELLED) {
             $this->logger->info(
                 'Klarna order is ' . $klarnaStatus . '. Cancelling Magento order: '
