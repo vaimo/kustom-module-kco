@@ -429,7 +429,8 @@ class Order
             return;
         }
 
-        $order->cancel();
+        $order->setState(SalesOrder::STATE_CANCELED);
+        $order->setStatus(SalesOrder::STATE_CANCELED);
         $order->addStatusHistoryComment(
             __('Order automatically cancelled because Klarna status is: %1', $klarnaStatus)
         );
