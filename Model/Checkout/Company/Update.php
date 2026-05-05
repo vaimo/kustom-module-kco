@@ -56,7 +56,7 @@ class Update
         }
 
         $storeCompanyIdAttributeCode = $this->dataProvider->getStoreCompanyIdAttributeCode($quote->getStore());
-        if ($storeCompanyIdAttributeCode === '') {
+        if ($storeCompanyIdAttributeCode === '0') {
             return;
         }
 
