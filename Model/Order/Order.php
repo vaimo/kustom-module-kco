@@ -652,4 +652,21 @@ class Order
     {
         return $this->mageOrder;
     }
+
+    /**
+     * @param string $klarnaOrderId
+     *
+     * @return bool
+     */
+    public function isMagentoOrderExists(string $klarnaOrderId): bool
+    {
+        try {
+            $this->workflowProvider->setKlarnaOrderId($klarnaOrderId);
+            $order = $this->workflowProvider->getMagentoOrder();
+
+            return (bool) $order->getId();
+        } catch (KlarnaException $exception) {
+            return false;
+        }
+    }
 }
