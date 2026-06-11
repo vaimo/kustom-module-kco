@@ -43,9 +43,9 @@ class WorkflowProviderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->mockFactory = new MockFactory($this);
-        $objectFactory = new TestObjectFactory($this->mockFactory);
-        $this->model = $objectFactory->create(WorkflowProvider::class);
+        $this->mockFactory     = new MockFactory($this);
+        $objectFactory         = new TestObjectFactory('');
+        $this->model           = $objectFactory->create(WorkflowProvider::class);
         $this->dependencyMocks = $objectFactory->getDependencyMocks();
 
         $this->model->setKlarnaOrderId('123');
