@@ -4,6 +4,7 @@
     "type": "magento2-module",
     "license": "Apache-2.0",
     "version": "12.0.23",
+    "abandoned": "kustom/module-kco",
     "scripts": {
         "test": "phpunit",
         "cov": "phpunit --coverage-html coverage"
